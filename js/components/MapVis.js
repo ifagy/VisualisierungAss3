@@ -112,7 +112,7 @@ export default class MapVis {
         let lo = Infinity, hi = -Infinity;
         vis.data.forEach(d => {
             if (vis.highlightOutlier && d.id === 1) return; 
-            const currentPrice = vis.priceFor(d);
+            const currentPrice = vis.priceFor(d); //filtered by year (below)
             if (currentPrice < lo) lo = currentPrice;
             if (currentPrice > hi) hi = currentPrice;
         });
@@ -125,7 +125,7 @@ export default class MapVis {
      */
     priceFor(d) {
         let vis = this;
-        const ts = d.price_ts.find(p => p.year === vis.mapYear);
+        const ts = d.price_ts.find(p => p.year === vis.mapYear); //filtered
         return ts ? ts.price : d.avg_price;
     }
 
@@ -136,7 +136,7 @@ export default class MapVis {
     commutersFor(d) {
         let vis = this;
         // Commuter flows data only goes up to 2023, so we cap the target year at 2023
-        const targetYear = vis.mapYear > 2023 ? 2023 : vis.mapYear;
+        const targetYear = vis.mapYear > 2023 ? 2023 : vis.mapYear; 
         
         if (d.commute_ts) {
             const ts = d.commute_ts.find(c => c.year === targetYear);
@@ -146,7 +146,7 @@ export default class MapVis {
             }
         }
         
-        // Fallback to static properties if time-series commuter data isn't found
+        // If for that year not found
         return { inC: d.in_commuters, outC: d.out_commuters };
     }
 
@@ -179,14 +179,14 @@ export default class MapVis {
         let vis = this;
 
         // Ensure smooth transitions matching the interval duration
-        const t = vis.chart.transition().duration(700).ease(d3.easeLinear);
+        const t = vis.chart.transition().duration(700).ease(d3.easeLinear); //700 millisecs
 
         // Update Legend Text based on the mode
         if (vis.isGlobalMode) {
             vis.legendMinText.text(`€${vis.priceMin.toFixed(1)}/m²`);
             vis.legendMaxText.text(`€${vis.priceMax.toFixed(1)}/m²`);
         } else {
-            vis.legendMinText.text('Affordable');
+            vis.legendMinText.text('Affordable'); //exact features would be confusing
             vis.legendMaxText.text('Expensive');
         }
 
@@ -200,14 +200,14 @@ export default class MapVis {
 
         // Draw and update District polygons
         const paths = vis.mapG.selectAll('.district-path')
-            .data(vis.geoData.features)
+            .data(vis.geoData.features) //GeoJSON
             .join('path')
                 .attr('class', 'district-path scrolly-map')
                 .attr('d', vis.path);
 
         // Bind interactions
         paths.on('mouseover', (event, f) => {
-            const d = vis.distMap.get(f.properties.BEZNR);
+            const d = vis.distMap.get(f.properties.BEZNR); //get district id
             if (!d) return;
             
             const currentPrice = vis.priceFor(d);
@@ -216,8 +216,8 @@ export default class MapVis {
             vis.dispatcher.call('showTooltip', event, event, tooltipHtml(d, vis.mapYear, currentPrice, currentCommuters));
             vis.dispatcher.call('linkDistrict', event, d.id);
         })
-        .on('mousemove', (event) => vis.dispatcher.call('moveTooltip', event, event))
-        .on('mouseout', () => {
+        .on('mousemove', (event) => vis.dispatcher.call('moveTooltip', event, event)) //track cursor
+        .on('mouseout', () => { //when not hovering on
             vis.dispatcher.call('hideTooltip');
             vis.dispatcher.call('unlinkDistrict');
         });
@@ -225,7 +225,7 @@ export default class MapVis {
         // Apply dynamic color fill transitions
         paths.transition(t).attr('fill', f => {
             const d = vis.distMap.get(f.properties.BEZNR);
-            return d ? vis.priceColor(vis.priceFor(d), d.id) : '#333';
+            return d ? vis.priceColor(vis.priceFor(d), d.id) : '#333'; //no data = grey
         });
 
         // District ID labels
@@ -244,7 +244,7 @@ export default class MapVis {
                 .attr('stroke', '#1a1b22')
                 .attr('stroke-width', '2.5px')
                 .attr('stroke-linejoin', 'round')
-                .attr('pointer-events', 'none')
+                .attr('pointer-events', 'none') //invisible to mouse
                 .text(f => f.properties.BEZNR);
     }
 
