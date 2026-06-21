@@ -40,11 +40,11 @@ export default class ScatterVis {
 
         // Initialize scales covering both negative and positive net balances
         vis.xScale = d3.scaleLinear()
-            .domain([d3.min(vis.data, vis.xValue) * 0.97, d3.max(vis.data, vis.xValue) * 1.03])
+            .domain([d3.min(vis.data, vis.xValue) * 0.97, d3.max(vis.data, vis.xValue) * 1.03]) // 3% more on both min and max
             .range([0, vis.width]);
             
         vis.yScale = d3.scaleLinear()
-            .domain([d3.min(vis.data, vis.yValue) * 1.1, d3.max(vis.data, vis.yValue) * 1.1])
+            .domain([d3.min(vis.data, vis.yValue) * 1.1, d3.max(vis.data, vis.yValue) * 1.1]) //10% here
             .range([vis.height, 0]);
 
         // Draw background grid lines (y-axis grid)
@@ -58,7 +58,7 @@ export default class ScatterVis {
         // Draw Zero-Balance reference line
         vis.chart.append('line')
             .attr('class', 'zero-line')
-            .attr('x1', 0).attr('x2', vis.width)
+            .attr('x1', 0).attr('x2', vis.width) // from pixel 0 to width
             .attr('y1', vis.yScale(0)).attr('y2', vis.yScale(0))
             .attr('stroke', '#4ecb8d')
             .attr('stroke-width', 1.5)
@@ -93,7 +93,7 @@ export default class ScatterVis {
             
         vis.chart.append('text')
             .attr('transform', 'rotate(-90)')
-            .attr('x', -vis.height / 2)
+            .attr('x', -vis.height / 2) //x and y changed due to rotation
             .attr('y', -54)
             .attr('text-anchor', 'middle')
             .attr('fill', '#7a7a8c')
@@ -123,12 +123,12 @@ export default class ScatterVis {
     renderVis() {
         let vis = this;
 
-        // Draw trend line
+        // Draw trend line: from update vis!!
         vis.chart.selectAll('.trend-line')
-            .data([1])
+            .data([1]) //one line
             .join('line')
                 .attr('class', 'trend-line')
-                .attr('x1', vis.xScale(vis.x0))
+                .attr('x1', vis.xScale(vis.x0)) //2 data points (x,y)
                 .attr('y1', vis.yScale(vis.slope * vis.x0 + vis.intercept))
                 .attr('x2', vis.xScale(vis.x1))
                 .attr('y2', vis.yScale(vis.slope * vis.x1 + vis.intercept))
@@ -141,7 +141,7 @@ export default class ScatterVis {
         const tooltipHtml = (d) => {
             const net = vis.yValue(d);
             const netColor = net >= 0 ? '#5b9cf6' : '#f5705b';
-            const netSign = net >= 0 ? '+' : '';
+            const netSign = net >= 0 ? '+' : ''; //minus automatic
             return `
                 <div class="tt-title">${d.id}. ${d.name}</div>
                 <div class="tt-row"><span class="tt-label">Avg rent</span><span class="tt-val">€${d.avg_price.toFixed(2)}/m²</span></div>
@@ -155,9 +155,9 @@ export default class ScatterVis {
             .join('circle')
                 .attr('class', 'scatter-dot')
                 .attr('data-district', d => d.id)
-                .attr('cx', d => vis.xScale(vis.xValue(d)))
+                .attr('cx', d => vis.xScale(vis.xValue(d)))  //from initVis
                 .attr('cy', d => vis.yScale(vis.yValue(d)))
-                .attr('r', d => d.id === 1 ? 9 : 7)
+                .attr('r', d => d.id === 1 ? 9 : 7) // to highliht
                 .attr('fill', d => d.id === 1 ? '#a855f7' : (vis.yValue(d) >= 0 ? '#5b9cf6' : '#f5705b'))
                 .attr('fill-opacity', 0.8)
                 .on('mouseover', (event, d) => {
@@ -182,10 +182,10 @@ export default class ScatterVis {
                 .attr('font-size', '9px')
                 .attr('font-family', 'Space Grotesk, sans-serif')
                 .attr('pointer-events', 'none')
-                .text(d => `${d.id}. ${d.name.split('-')[0].split('–')[0]}`);
+                .text(d => `${d.id}. ${d.name.split('-')[0].split('–')[0]}`); //only the first part of -
 
         // Update Axes formatting
-        vis.xAxisG.call(d3.axisBottom(vis.xScale).ticks(6).tickFormat(d => `€${d.toFixed(0)}`))
+        vis.xAxisG.call(d3.axisBottom(vis.xScale).ticks(6).tickFormat(d => `€${d.toFixed(0)}`)) //rid of decimals
             .call(ax => { 
                 ax.selectAll('text').attr('fill', '#7a7a8c').attr('font-size', '10px'); 
                 ax.selectAll('line,path').attr('stroke', '#2a2b35'); 
@@ -193,7 +193,7 @@ export default class ScatterVis {
 
         // Format Y axis to show 'k' (thousands) and keep negative signs
         const formatY = d => {
-            const val = Math.round(d / 1000);
+            const val = Math.round(d / 1000); //write k later
             return val === 0 ? '0' : val + 'k';
         };
 
@@ -208,7 +208,7 @@ export default class ScatterVis {
     animateDots() {
         let vis = this;
         vis.dots.attr('r', 0)
-            .transition().duration(600).delay((_, i) => i * 25)
+            .transition().duration(600).delay((_, i) => i * 25) //aesthetics
             .attr('r', d => d.id === 1 ? 9 : 7);
     }
 }
